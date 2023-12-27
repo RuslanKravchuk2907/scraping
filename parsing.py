@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from time import sleep
 
+list_card_url = []
+
 headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 
 for count in range(1,8):
@@ -18,14 +20,23 @@ for count in range(1,8):
 
     for i in data:
 
-        name = i.find("h4").text.replace("\n", "") # name of specific product
+       card_url = "https://scrapingclub.com" + i.find("a").get("href")
+       list_card_url.append(card_url)
 
-        price = i.find("h5").text # price of a specific product
+for card_url in list_card_url:
 
-        url_img ="https://scrapingclub.com" + i.find("img", class_="card-img-top img-fluid" ).get("src") # link to an image of a specific product
+    response = requests.get(card_url, headers=headers)
 
-        print(name + "\n" + price + "\n" + url_img + "\n\n")
-#print(name)
-#print(price)
-#print(url_img)
-#print(data)
+    soup = BeautifulSoup(response.text, "lxml") # parser
+
+    data = soup.find("div", class_="my-8 w-full rounded border")
+
+    name = data.find("h3", class_="card-title").text
+
+    price = data.find("h4").text
+
+    text = data.find("p", class_ = "card-description").text
+
+    url_img ="https://scrapingclub.com" + data.find("img", class_="card-img-top").get("src")
+
+    print(name + "\n" + price + "\n" + text + "\n" + url_img + "\n\n")
